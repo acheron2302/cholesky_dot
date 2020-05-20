@@ -1,52 +1,78 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 
-	"cholesky/pkg"
-
+	cholesky "cholesky/pkg"
 	"gonum.org/v1/gonum/mat"
 )
 
 func main() {
-	var dim int
-
-	fmt.Printf("Insert the dim of the square matrix: ")
-	if _, err := fmt.Scanf("%d", &dim); err != nil {
-		fmt.Println("The dim must be integer")
-		return
+	matrix, err := inputMatrix("./TestData/matrixTest.txt")
+	if err != nil {
+		fmt.Printf("Error when try to read matrix: %v\n", err)
 	}
 
-	data := make([]float64, dim*dim)
-	for i := 0; i < dim; i++ {
-		fmt.Printf("Insert row number %d: ", i+1)
-		for j := 0; j < dim; j++ {
-			fmt.Scanf("%f", &data[i*dim+j])
+	vec, err := inputVec("./TestData/vectorTest.txt")
+	if err != nil {
+		fmt.Printf("Error when try to read vec: %v\n", err)
+	}
+
+	result, err := cholesky.SolveGeneral(vec, matrix)
+	if err != nil {
+		fmt.Printf("Error when try to solve cholesky: %v\n", err)
+	}
+
+	fmt.Printf("The result vector x: \n% v\n", mat.Formatted(result))
+}
+
+func inputMatrix(file string) (*mat.Dense, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var arr []float64
+	var n int
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		arrText := strings.Split(scanner.Text(), " ")
+		n = len(arrText)
+		for _, text := range arrText {
+			value, err := strconv.ParseFloat(text, 64)
+			if err != nil {
+				return nil, err
+			}
+			arr = append(arr, value)
 		}
 	}
-	sym, err := cholesky.NewSym(dim, data)
+
+	return mat.NewDense(n, n, arr), nil
+}
+
+func inputVec(file string) (*mat.VecDense, error) {
+	f, err := os.Open(file)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, err
 	}
-	fmt.Printf("The matrix is:\n% v\n", mat.Formatted(sym, mat.Squeeze()))
+	defer f.Close()
 
-	triMat, err := cholesky.Chol(sym, mat.Lower)
-	if err != nil {
-		fmt.Println(err)
-		return
+	var arr []float64
+	var n int
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		value, err := strconv.ParseFloat(scanner.Text(), 64)
+		if err != nil {
+			return nil, err
+		}
+		arr = append(arr, value)
+		n++
 	}
 
-	fmt.Printf("The lower triangle matrix is:\n% v\n", mat.Formatted(triMat, mat.Squeeze()))
-
-	/*
-	 *inp := make([]float64, dim)
-	 *fmt.Printf("Input the vector: ")
-	 *for i := 0; i < dim; i++ {
-	 *    fmt.Scanf("%f", &inp[i])
-	 *}
-	 *vec := mat.NewVecDense(dim, inp)
-	 *result := cholesky.SolveChol(vec, triMat)
-	 *fmt.Printf("The result x is: \n%v\n", mat.Formatted(result))
-	 */
+	return mat.NewVecDense(n, arr), nil
 }
