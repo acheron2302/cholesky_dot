@@ -43,7 +43,7 @@ func cholLower(triMatrix *CTriDense, sym mat.Symmetric) error {
 			s := 0 + 0i
 
 			for k := 0; k < j; k++ {
-				s += triMatrix.At(i, k) * cmplx.Conj(triMatrix.At(j, k))
+				s += triMatrix.At(i, k) * triMatrix.At(j, k)
 			}
 
 			Lij *= complex(sym.At(i, j), 0) - s
@@ -52,7 +52,7 @@ func cholLower(triMatrix *CTriDense, sym mat.Symmetric) error {
 
 		s := 0 + 0i
 		for k := 0; k < i; k++ {
-			s += triMatrix.At(i, k) * cmplx.Conj(triMatrix.At(i, k))
+			s += triMatrix.At(i, k) * triMatrix.At(i, k)
 		}
 		Lii := cmplx.Sqrt(complex(sym.At(i, i), 0) - s)
 		if Lii == 0 {

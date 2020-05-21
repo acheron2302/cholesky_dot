@@ -1,6 +1,8 @@
 package cholesky
 
-import "gonum.org/v1/gonum/mat"
+import (
+	"gonum.org/v1/gonum/mat"
+)
 
 type CTriDense struct {
 	Matrix *mat.CDense
