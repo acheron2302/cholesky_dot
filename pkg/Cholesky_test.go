@@ -95,11 +95,29 @@ func TestSolveGeneral(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := newCVector(3, []complex128{
+	expected := mat.NewVecDense(3, []float64{
 		-9.219662058369668,
 		54.55760368662457,
 		-24.45775729646123,
 	})
 
 	assert.Equal(t, expected, result)
+}
+
+func TestInverse(t *testing.T) {
+	A := mat.NewDense(4, 4, []float64{
+		354, 5432, 5342, 534,
+		543, 54, 54, 23,
+		54, 45, 32, 2,
+		2, 4, 3, 42,
+	})
+
+	result, err := Inverse(A)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	A.Mul(A, result)
+	fmt.Printf("the inverse matrix is:\n% .4v\n", mat.Formatted(result))
+	fmt.Printf("the result when multiple two matrix is:\n% .4v\n", mat.Formatted(A))
 }

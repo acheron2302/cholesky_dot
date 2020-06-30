@@ -91,8 +91,6 @@ func Chol(sym mat.Symmetric, kind mat.TriKind) (*CTriDense, error) {
 		return nil, err
 	}
 
-	fmt.Printf("The triangle matrix is:\n% v\n", Formatted(triMatrix))
-
 	return triMatrix, nil
 }
 
@@ -147,8 +145,6 @@ func ChangeToSymMatrix(matrix *mat.Dense, vec *mat.VecDense) (*mat.SymDense, *ma
 		}
 	}
 	resultMat := mat.NewSymDense(vec.Len(), arr)
-	fmt.Printf("The matrix is: \n% v\n", mat.Formatted(matrix))
-	fmt.Printf("The vector is: \n% v\n", mat.Formatted(vec))
 
 	return resultMat, vec
 }
@@ -166,4 +162,31 @@ func SolveGeneral(vec *mat.VecDense, matrix *mat.Dense) (*mat.VecDense, error) {
 	}
 
 	return result, nil
+}
+
+func Inverse(matrix *mat.Dense) (*mat.Dense, error) {
+	n, _ := matrix.Dims()
+	identityMat := createIdentityMatrix(n)
+	inverseMat := mat.NewDense(n, n, nil)
+
+	for i := 0; i < n; i++ {
+		b := changeVecToDenseVec(identityMat.ColView(i))
+		result, err := SolveGeneral(b, matrix)
+		if err != nil {
+			return nil, err
+		}
+
+		inverseMat.SetCol(i, result.RawVector().Data)
+	}
+
+	return inverseMat, nil
+}
+
+func changeVecToDenseVec(vec mat.Vector) *mat.VecDense {
+	result := mat.NewVecDense(vec.Len(), nil)
+	for i := 0; i < vec.Len(); i++ {
+		result.SetVec(i, vec.AtVec(i))
+	}
+
+	return result
 }
